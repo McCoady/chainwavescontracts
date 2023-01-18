@@ -124,16 +124,15 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     }
 
     // TODO: add merkle root,
-    function snowcrashMint(address account, bytes32[] calldata merkleProof)
+    function snowcrashMint(bytes32[] calldata merkleProof)
         external
         payable
     {
-        bytes32 node = keccak256(abi.encodePacked(account));
+        bytes32 node = keccak256(abi.encodePacked(msg.sender));
         require(
             MerkleProof.verify(merkleProof, snowcrashRoot, node),
             "Not on WL"
         );
-        if (account != msg.sender) revert SelfMintOnly();
         if (msg.value != MINT_PRICE) revert MintPrice();
 
         uint256 minterInfo = mintInfo[msg.sender];
