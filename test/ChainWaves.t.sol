@@ -158,4 +158,24 @@ contract ChainWavesTest is Test {
         chainWaves.withdraw();
         assert(newOwner.balance == 0.0256 ether);
     }
+
+    function testMerkllProofMint() public {
+        // TODO: change to a valid proof
+        bytes32[] memory proof = new bytes32[](2);
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+        vm.stopPrank();
+        // TODO: change to WL address
+        hoax(address(0x0));
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 1);
+    }
+
+    function testFailWrongProofMint() public {
+        bytes32[] memory proof = new bytes32[](2);
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+    }
 }
