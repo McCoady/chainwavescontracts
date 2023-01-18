@@ -27,12 +27,6 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         string colTwo;
     }
 
-    struct MintInfo {
-        uint128 lastWrite;
-        bool snowcrashMinted;
-        bool publicMinted;
-    }
-
     uint256 public constant MAX_SUPPLY = 512;
     uint256 public constant MINT_PRICE = 0.0256 ether;
     uint256 public constant SNOWCRASH_PRICE = 0.05 ether;
@@ -50,7 +44,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     bool private freeMinted;
 
-    mapping(address => MintInfo) mintInfo;
+    mapping(address => uint256) mintInfo;
     mapping(uint256 => HashNeeds) tokenIdToHashNeeds;
     mapping(uint256 => Trait[]) public traitTypes;
 
@@ -83,7 +77,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     //prevents someone calling read functions the same block they mint
     modifier disallowIfStateIsChanging() {
-        if (mintInfo[msg.sender].lastWrite == block.number) revert Stap();
+        if ((mintInfo[msg.sender] >> 8) == block.number) revert Stap();
         _;
     }
 
@@ -130,11 +124,11 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (_amount > MAX_MINT) revert MaxThree();
         if (msg.value != MINT_PRICE * _amount) revert MintPrice();
 
-        MintInfo memory minterInfo = mintInfo[msg.sender];
-        if (minterInfo.publicMinted) revert PublicMinted();
+        uint256 minterInfo = mintInfo[msg.sender];
+        if ((minterInfo & 0xF) != 0) revert PublicMinted();
 
-        minterInfo.publicMinted = true;
-        minterInfo.lastWrite = uint128(block.number);
+        minterInfo |= 1;
+        minterInfo = (minterInfo & 0xFF) + (block.number << 8);
         mintInfo[msg.sender] = minterInfo;
 
         mintInternal(msg.sender, _amount);
@@ -153,13 +147,13 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (account != msg.sender) revert SelfMintOnly();
         if (msg.value != MINT_PRICE) revert MintPrice();
 
-        MintInfo memory minterInfo = mintInfo[msg.sender];
-        if (minterInfo.snowcrashMinted) revert SnowcrashMinted();
+        uint256 minterInfo = mintInfo[msg.sender];
+        if ((minterInfo & 0xF0 >> 4) != 0) revert SnowcrashMinted();
         if (snowcrashReserve == 0) revert ReserveClosed();
         --snowcrashReserve;
 
-        minterInfo.snowcrashMinted = true;
-        minterInfo.lastWrite = uint128(block.number);
+        minterInfo |= (1 << 4);
+        minterInfo = (minterInfo & 0xFF) + (block.number << 8);
         mintInfo[msg.sender] = minterInfo;
 
         mintInternal(msg.sender, 1);
