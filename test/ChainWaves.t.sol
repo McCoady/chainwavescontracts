@@ -100,6 +100,32 @@ contract ChainWavesTest is Test {
         assertEq(chainWaves.totalSupply(), 3);
     }
 
+    function testFreeMint3x1() public {
+        address[] memory mintTo = new address[](3);
+        mintTo[0] = makeAddr("Alexstrasza");
+        mintTo[1] = makeAddr("Malygos");
+        mintTo[2] = makeAddr("Neltharion");
+        uint256[] memory amount = new uint256[](3);
+        amount[0] = 1;
+        amount[1] = 1;
+        amount[2] = 1;
+        chainWaves.freeMints(mintTo, amount);
+        assertEq(chainWaves.totalSupply(), 3);
+    }
+
+    function testFreeMint3x3() public {
+        address[] memory mintTo = new address[](3);
+        mintTo[0] = makeAddr("Alexstrasza");
+        mintTo[1] = makeAddr("Malygos");
+        mintTo[2] = makeAddr("Neltharion");
+        uint256[] memory amount = new uint256[](3);
+        amount[0] = 3;
+        amount[1] = 3;
+        amount[2] = 3;
+        chainWaves.freeMints(mintTo, amount);
+        assertEq(chainWaves.totalSupply(), 9);
+    }
+
     function testTokenUri() public {
         chainWaves.normieMint{value: 0.0256 ether}(1);
         vm.roll(10);

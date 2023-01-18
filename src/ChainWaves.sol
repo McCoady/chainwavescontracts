@@ -16,11 +16,6 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         string traitType;
     }
 
-    struct HashNeeds {
-        uint16 startHash;
-        uint16 startNonce;
-    }
-
     struct Palette {
         string bg;
         string colOne;
@@ -36,8 +31,6 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     uint256 public totalSupply;
 
-    uint16 private SEED_NONCE = 3;
-
     // TODO: generate actual root (this is folded faces)
     bytes32 constant snowcrashRoot =
         0x358899790e0e071faed348a1b72ef18efe59029543a4a4da16e13fa2abf2a578;
@@ -45,7 +38,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     bool private freeMinted;
 
     mapping(address => uint256) mintInfo;
-    mapping(uint256 => HashNeeds) tokenIdToHashNeeds;
+    mapping(uint256 => uint256) tokenIdToHash;
     mapping(uint256 => Trait[]) public traitTypes;
 
     //Mappings
@@ -108,16 +101,12 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     /**
      * @param _a The address to be used within the hash.
      */
-    function hash(address _a) internal view returns (uint16) {
-        uint16 _randinput = uint16(
-            uint256(
-                keccak256(
-                    abi.encodePacked(block.timestamp, block.difficulty, _a)
-                )
-            ) % 10000
+    function hash(address _a, uint256 _tokenId) internal view returns (uint256) {
+        return uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, block.difficulty, _a, _tokenId)
+            )
         );
-
-        return _randinput;
     }
 
     function normieMint(uint256 _amount) external payable {
@@ -178,14 +167,13 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (totalSupply + _amount + snowcrashReserve > MAX_SUPPLY)
             revert SoldOut();
         uint256 firstTokenId = totalSupply;
+        uint256 newTotalSupply = totalSupply + _amount;
 
-        for (uint256 i; i < _amount; ++i) {
-            tokenIdToHashNeeds[i] = HashNeeds(hash(_to), SEED_NONCE);
+        for (;firstTokenId < newTotalSupply; ++firstTokenId) {
+            tokenIdToHash[firstTokenId] = hash(_to, firstTokenId);
             _mint(_to, firstTokenId);
-            ++firstTokenId;
         }
-        SEED_NONCE += 10;
-        totalSupply += _amount;
+        totalSupply = newTotalSupply;
     }
 
     // hash stuff
@@ -198,13 +186,11 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     function buildHash(uint256 _t) internal view returns (string memory) {
         // This will generate a 4 character string.
         string memory currentHash = "";
-        uint256 rInput = tokenIdToHashNeeds[_t].startHash;
-        uint256 _nonce = tokenIdToHashNeeds[_t].startNonce;
+        uint256 tokenHash = tokenIdToHash[_t];
 
         for (uint8 i; i < 6; ++i) {
-            ++_nonce;
             uint16 _randinput = uint16(
-                uint256(keccak256(abi.encodePacked(rInput, _t, _nonce))) % 10000
+                uint256(keccak256(abi.encodePacked(tokenHash, i))) % 10000
             );
             currentHash = string(
                 abi.encodePacked(
