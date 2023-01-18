@@ -27,6 +27,12 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         string colTwo;
     }
 
+    struct MintInfo {
+        uint128 lastWrite;
+        bool snowcrashMinted;
+        bool publicMinted;
+    }
+
     uint256 public constant MAX_SUPPLY = 512;
     uint256 public constant MINT_PRICE = 0.0256 ether;
     uint256 public constant SNOWCRASH_PRICE = 0.05 ether;
@@ -44,11 +50,9 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     bool private freeMinted;
 
-    mapping(address => bool) publicMinted;
-    mapping(address => bool) snowcrashMinted;
+    mapping(address => MintInfo) mintInfo;
     mapping(uint256 => HashNeeds) tokenIdToHashNeeds;
     mapping(uint256 => Trait[]) public traitTypes;
-    mapping(address => uint256) lastWrite;
 
     //Mappings
 
@@ -79,7 +83,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     //prevents someone calling read functions the same block they mint
     modifier disallowIfStateIsChanging() {
-        if (lastWrite[msg.sender] == block.number) revert Stap();
+        if (mintInfo[msg.sender].lastWrite == block.number) revert Stap();
         _;
     }
 
@@ -125,10 +129,15 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     function normieMint(uint256 _amount) external payable {
         if (_amount > MAX_MINT) revert MaxThree();
         if (msg.value != MINT_PRICE * _amount) revert MintPrice();
-        if (publicMinted[msg.sender]) revert PublicMinted();
 
-        publicMinted[msg.sender] = true;
-        return mintInternal(msg.sender, _amount);
+        MintInfo memory minterInfo = mintInfo[msg.sender];
+        if (minterInfo.publicMinted) revert PublicMinted();
+
+        minterInfo.publicMinted = true;
+        minterInfo.lastWrite = uint128(block.number);
+        mintInfo[msg.sender] = minterInfo;
+
+        mintInternal(msg.sender, _amount);
     }
 
     // TODO: add merkle root,
@@ -143,10 +152,17 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         );
         if (account != msg.sender) revert SelfMintOnly();
         if (msg.value != MINT_PRICE) revert MintPrice();
-        if (snowcrashMinted[msg.sender]) revert SnowcrashMinted();
+
+        MintInfo memory minterInfo = mintInfo[msg.sender];
+        if (minterInfo.snowcrashMinted) revert SnowcrashMinted();
         if (snowcrashReserve == 0) revert ReserveClosed();
         --snowcrashReserve;
-        return mintInternal(msg.sender, 1);
+
+        minterInfo.snowcrashMinted = true;
+        minterInfo.lastWrite = uint128(block.number);
+        mintInfo[msg.sender] = minterInfo;
+
+        mintInternal(msg.sender, 1);
     }
 
     function freeMints(
@@ -174,7 +190,6 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
             _mint(_to, firstTokenId);
             ++firstTokenId;
         }
-        lastWrite[msg.sender] = block.number;
         SEED_NONCE += 10;
         totalSupply += _amount;
     }
