@@ -166,12 +166,12 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (!MINTING_LIVE) revert NotLive();
         if (totalSupply + _amount + snowcrashReserve > MAX_SUPPLY)
             revert SoldOut();
-        uint256 firstTokenId = totalSupply;
+        uint256 nextTokenId = totalSupply;
         uint256 newTotalSupply = totalSupply + _amount;
 
-        for (;firstTokenId < newTotalSupply; ++firstTokenId) {
-            tokenIdToHash[firstTokenId] = hash(_to, firstTokenId);
-            _mint(_to, firstTokenId);
+        for (;nextTokenId < newTotalSupply; ++nextTokenId) {
+            tokenIdToHash[nextTokenId] = hash(_to, nextTokenId);
+            _mint(_to, nextTokenId);
         }
         totalSupply = newTotalSupply;
     }
