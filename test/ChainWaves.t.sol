@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../src/ChainWaves.sol";
+import "../src/ChainWavesErrors.sol";
 
 import "forge-std/Test.sol";
 
@@ -18,6 +19,7 @@ contract ChainWavesTest is Test {
         setUpDetail();
         setUpCols();
         chainWaves.flipMint();
+        vm.warp(chainWaves.MINT_START());
     }
 
     function setUpPalettes() public {
@@ -95,6 +97,11 @@ contract ChainWavesTest is Test {
         chainWaves.normieMint(0);
     }
 
+    function testFailMintEarly() public {
+        vm.warp(chainWaves.MINT_START() - 1);
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+    }
+
     function testNormieMintOne() public {
         chainWaves.normieMint{value: 0.0256 ether}(1);
         assertEq(chainWaves.totalSupply(), 1);
@@ -161,37 +168,202 @@ contract ChainWavesTest is Test {
 
     function testSnowcrashMint() public {
         // TODO: change to a valid proof
-        bytes32[] memory proof = new bytes32[](2);
-        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
-        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+        bytes32[] memory proof = new bytes32[](8);
+        proof[
+            0
+        ] = 0xe6e7d43627ef26915e465da21a2b7a7dac9303693b04acd43b76064d24cb0023;
+        proof[
+            1
+        ] = 0x39a123a730ca7542702dd494f9fdda13aeb76805d7f6713e8a0a97b0e3fdacc1;
+        proof[
+            2
+        ] = 0x437e46241a0e9868922756c86d716dc7fb28145693614889e49c2e103d4d5b60;
+        proof[
+            3
+        ] = 0x9381564e58e1f0b73a1edcda9469f6c59407e5e7ae1f54bdebf2e00c2be5a23e;
+        proof[
+            4
+        ] = 0xf415bceb3738fb943750f569b226fe96c64ac1b3a8075a4418c08b697c41c683;
+        proof[
+            5
+        ] = 0x16ee7eada7331c3fdd16eef20108f4a329386c20e4951c3e689bb7363072c81f;
+        proof[
+            6
+        ] = 0x33a88c386975fc0b82b5ca060f50614cbbf3b517743921d01f201174d9050261;
+        proof[
+            7
+        ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
 
         vm.stopPrank();
         // TODO: change to WL address
-        hoax(address(0x0));
+        hoax(0x4533d1F65906368ebfd61259dAee561DF3f3559D);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
     }
 
-    function testFailSnowcrashMintTwice() public {
+    // Currently doesn't work (can inifite mint)
+    function testCannotSnowcrashMintTwice() public {
         // TODO: make sure this is failing for the right reason
 
-        // TODO: change to a valid proof
-        bytes32[] memory proof = new bytes32[](2);
-        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
-        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        bytes32[] memory proof = new bytes32[](8);
+        proof[
+            0
+        ] = 0xe6e7d43627ef26915e465da21a2b7a7dac9303693b04acd43b76064d24cb0023;
+        proof[
+            1
+        ] = 0x39a123a730ca7542702dd494f9fdda13aeb76805d7f6713e8a0a97b0e3fdacc1;
+        proof[
+            2
+        ] = 0x437e46241a0e9868922756c86d716dc7fb28145693614889e49c2e103d4d5b60;
+        proof[
+            3
+        ] = 0x9381564e58e1f0b73a1edcda9469f6c59407e5e7ae1f54bdebf2e00c2be5a23e;
+        proof[
+            4
+        ] = 0xf415bceb3738fb943750f569b226fe96c64ac1b3a8075a4418c08b697c41c683;
+        proof[
+            5
+        ] = 0x16ee7eada7331c3fdd16eef20108f4a329386c20e4951c3e689bb7363072c81f;
+        proof[
+            6
+        ] = 0x33a88c386975fc0b82b5ca060f50614cbbf3b517743921d01f201174d9050261;
+        proof[
+            7
+        ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
+
+        vm.stopPrank();
+        startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 1);
+        // should revert here
+        vm.expectRevert(ChainWavesErrors.SnowcrashMinted.selector);
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+    }
+
+    // Currently works,
+    function testSnowcrashMintThrice() public {
+        // TODO: make sure this is failing for the right reason
+
+        bytes32[] memory proof = new bytes32[](8);
+        proof[
+            0
+        ] = 0xe6e7d43627ef26915e465da21a2b7a7dac9303693b04acd43b76064d24cb0023;
+        proof[
+            1
+        ] = 0x39a123a730ca7542702dd494f9fdda13aeb76805d7f6713e8a0a97b0e3fdacc1;
+        proof[
+            2
+        ] = 0x437e46241a0e9868922756c86d716dc7fb28145693614889e49c2e103d4d5b60;
+        proof[
+            3
+        ] = 0x9381564e58e1f0b73a1edcda9469f6c59407e5e7ae1f54bdebf2e00c2be5a23e;
+        proof[
+            4
+        ] = 0xf415bceb3738fb943750f569b226fe96c64ac1b3a8075a4418c08b697c41c683;
+        proof[
+            5
+        ] = 0x16ee7eada7331c3fdd16eef20108f4a329386c20e4951c3e689bb7363072c81f;
+        proof[
+            6
+        ] = 0x33a88c386975fc0b82b5ca060f50614cbbf3b517743921d01f201174d9050261;
+        proof[
+            7
+        ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
+
+        vm.stopPrank();
+
+        startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 1);
+        // should revert here
+        // vm.expectRevert(ChainWavesErrors.SnowcrashMinted.selector);
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+    }
+
+    function testMintSnowcrashThenNormie() public {
+        bytes32[] memory proof = new bytes32[](8);
+        proof[
+            0
+        ] = 0xe6e7d43627ef26915e465da21a2b7a7dac9303693b04acd43b76064d24cb0023;
+        proof[
+            1
+        ] = 0x39a123a730ca7542702dd494f9fdda13aeb76805d7f6713e8a0a97b0e3fdacc1;
+        proof[
+            2
+        ] = 0x437e46241a0e9868922756c86d716dc7fb28145693614889e49c2e103d4d5b60;
+        proof[
+            3
+        ] = 0x9381564e58e1f0b73a1edcda9469f6c59407e5e7ae1f54bdebf2e00c2be5a23e;
+        proof[
+            4
+        ] = 0xf415bceb3738fb943750f569b226fe96c64ac1b3a8075a4418c08b697c41c683;
+        proof[
+            5
+        ] = 0x16ee7eada7331c3fdd16eef20108f4a329386c20e4951c3e689bb7363072c81f;
+        proof[
+            6
+        ] = 0x33a88c386975fc0b82b5ca060f50614cbbf3b517743921d01f201174d9050261;
+        proof[
+            7
+        ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
+
+        vm.stopPrank();
+
+        startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 1);
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+        assertEq(chainWaves.totalSupply(), 2);
+    }
+
+    function testMintNormieThenSnowcrash() public {
+        // TODO: make revert work properly
+
+        bytes32[] memory proof = new bytes32[](8);
+        proof[
+            0
+        ] = 0xe6e7d43627ef26915e465da21a2b7a7dac9303693b04acd43b76064d24cb0023;
+        proof[
+            1
+        ] = 0x39a123a730ca7542702dd494f9fdda13aeb76805d7f6713e8a0a97b0e3fdacc1;
+        proof[
+            2
+        ] = 0x437e46241a0e9868922756c86d716dc7fb28145693614889e49c2e103d4d5b60;
+        proof[
+            3
+        ] = 0x9381564e58e1f0b73a1edcda9469f6c59407e5e7ae1f54bdebf2e00c2be5a23e;
+        proof[
+            4
+        ] = 0xf415bceb3738fb943750f569b226fe96c64ac1b3a8075a4418c08b697c41c683;
+        proof[
+            5
+        ] = 0x16ee7eada7331c3fdd16eef20108f4a329386c20e4951c3e689bb7363072c81f;
+        proof[
+            6
+        ] = 0x33a88c386975fc0b82b5ca060f50614cbbf3b517743921d01f201174d9050261;
+        proof[
+            7
+        ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
 
         vm.stopPrank();
         // TODO: change to WL address
-        startHoax(address(0x0));
-        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
+        chainWaves.normieMint{value: 0.0256 ether}(1);
         assertEq(chainWaves.totalSupply(), 1);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 2);
     }
 
     function testFailWrongProofMint() public {
         bytes32[] memory proof = new bytes32[](2);
-        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
-        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[
+            0
+        ] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[
+            1
+        ] = 0x0000000000000000000000000000000000000000000000000000000000000000;
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
     }
 }

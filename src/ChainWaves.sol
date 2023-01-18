@@ -16,24 +16,18 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         string traitType;
     }
 
-    struct Palette {
-        string bg;
-        string colOne;
-        string colTwo;
-    }
-
     uint256 public constant MAX_SUPPLY = 512;
     uint256 public constant MINT_PRICE = 0.0256 ether;
-    uint256 public constant SNOWCRASH_PRICE = 0.05 ether;
+    uint256 public constant MINT_START = 1674156600;
     uint256 public constant MAX_MINT = 3;
-    uint256 public snowcrashReserve = 150;
+    uint256 public snowcrashReserve = 120;
     bool public MINTING_LIVE;
 
     uint256 public totalSupply;
 
     // TODO: generate actual root (this is folded faces)
     bytes32 constant snowcrashRoot =
-        0x358899790e0e071faed348a1b72ef18efe59029543a4a4da16e13fa2abf2a578;
+        0x20a2baf6f58cf2cfad13ed82dba586e61e6c16237f00add3c2d30da405dfc4af;
 
     bool private freeMinted;
 
@@ -101,12 +95,22 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     /**
      * @param _a The address to be used within the hash.
      */
-    function hash(address _a, uint256 _tokenId) internal view returns (uint256) {
-        return uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, block.difficulty, _a, _tokenId)
-            )
-        );
+    function hash(address _a, uint256 _tokenId)
+        internal
+        view
+        returns (uint256)
+    {
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp,
+                        block.difficulty,
+                        _a,
+                        _tokenId
+                    )
+                )
+            );
     }
 
     function normieMint(uint256 _amount) external payable {
@@ -124,10 +128,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     }
 
     // TODO: add merkle root,
-    function snowcrashMint(bytes32[] calldata merkleProof)
-        external
-        payable
-    {
+    function snowcrashMint(bytes32[] calldata merkleProof) external payable {
         bytes32 node = keccak256(abi.encodePacked(msg.sender));
         require(
             MerkleProof.verify(merkleProof, snowcrashRoot, node),
@@ -136,7 +137,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (msg.value != MINT_PRICE) revert MintPrice();
 
         uint256 minterInfo = mintInfo[msg.sender];
-        if ((minterInfo & 0xF0 >> 4) != 0) revert SnowcrashMinted();
+        if ((minterInfo & (0xF0 >> 4)) != 0) revert SnowcrashMinted();
         if (snowcrashReserve == 0) revert ReserveClosed();
         --snowcrashReserve;
 
@@ -162,14 +163,14 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     }
 
     function mintInternal(address _to, uint256 _amount) internal {
-        if (!MINTING_LIVE) revert NotLive();
+        if (!MINTING_LIVE || block.timestamp < MINT_START) revert NotLive();
         if (_amount == 0) revert MintZero();
         if (totalSupply + _amount + snowcrashReserve > MAX_SUPPLY)
             revert SoldOut();
         uint256 nextTokenId = totalSupply;
         uint256 newTotalSupply = totalSupply + _amount;
 
-        for (;nextTokenId < newTotalSupply; ++nextTokenId) {
+        for (; nextTokenId < newTotalSupply; ++nextTokenId) {
             tokenIdToHash[nextTokenId] = hash(_to, nextTokenId);
             _mint(_to, nextTokenId);
         }
