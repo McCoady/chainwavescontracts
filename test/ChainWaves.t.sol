@@ -174,7 +174,7 @@ contract ChainWavesTest is Test {
 
     function testFailSnowcrashMintTwice() public {
         // TODO: make sure this is failing for the right reason
-        
+
         // TODO: change to a valid proof
         bytes32[] memory proof = new bytes32[](2);
         proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
@@ -182,7 +182,7 @@ contract ChainWavesTest is Test {
 
         vm.stopPrank();
         // TODO: change to WL address
-        hoax(address(0x0));
+        startHoax(address(0x0));
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
