@@ -159,7 +159,7 @@ contract ChainWavesTest is Test {
         assert(newOwner.balance == 0.0256 ether);
     }
 
-    function testMerkleProofMint() public {
+    function testSnowcrashMint() public {
         // TODO: change to a valid proof
         bytes32[] memory proof = new bytes32[](2);
         proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
@@ -170,6 +170,22 @@ contract ChainWavesTest is Test {
         hoax(address(0x0));
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
+    }
+
+    function testFailSnowcrashMintTwice() public {
+        // TODO: make sure this is failing for the right reason
+        
+        // TODO: change to a valid proof
+        bytes32[] memory proof = new bytes32[](2);
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[1] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+        vm.stopPrank();
+        // TODO: change to WL address
+        hoax(address(0x0));
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        assertEq(chainWaves.totalSupply(), 1);
+        chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
     }
 
     function testFailWrongProofMint() public {
