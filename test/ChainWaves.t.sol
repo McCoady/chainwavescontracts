@@ -147,4 +147,15 @@ contract ChainWavesTest is Test {
         string memory uri = chainWaves.tokenURI(0);
         console.logString(uri);
     }
+
+    function testWithdrawl() public {
+        address newOwner = makeAddr("Onyxia");
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+        chainWaves.transferOwnership(newOwner);
+        vm.stopPrank();
+        assert(newOwner.balance == 0);
+        vm.prank(newOwner);
+        chainWaves.withdraw();
+        assert(newOwner.balance == 0.0256 ether);
+    }
 }
