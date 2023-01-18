@@ -17,4 +17,5 @@ interface ChainWavesErrors {
     error NonExistantId();
     error Stap();
     error WithdrawFail();
+    error MintZero();
 }

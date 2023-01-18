@@ -90,6 +90,10 @@ contract ChainWavesTest is Test {
     //     assertEq(chainWaves.totalSupply(), 5);
     // }
 
+    function testFailMintZero() public {
+        chainWaves.normieMint(0);
+    }
+
     function testNormieMintOne() public {
         chainWaves.normieMint{value: 0.0256 ether}(1);
         assertEq(chainWaves.totalSupply(), 1);

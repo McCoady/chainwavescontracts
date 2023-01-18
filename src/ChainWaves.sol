@@ -164,6 +164,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     function mintInternal(address _to, uint256 _amount) internal {
         if (!MINTING_LIVE) revert NotLive();
+        if (_amount == 0) revert MintZero();
         if (totalSupply + _amount + snowcrashReserve > MAX_SUPPLY)
             revert SoldOut();
         uint256 nextTokenId = totalSupply;
