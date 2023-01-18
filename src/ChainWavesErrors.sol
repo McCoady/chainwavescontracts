@@ -9,7 +9,7 @@ interface ChainWavesErrors {
     error PublicMinted();
     error SnowcrashMinted();
     error NotToad();
-    error FreeMinted();
+    error FreeMintDone();
     error NotSnowcrashList();
     error ReserveClosed();
     error SelfMintOnly();

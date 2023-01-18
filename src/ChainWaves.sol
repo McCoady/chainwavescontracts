@@ -64,7 +64,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         chainWavesGenerator = new ChainWavesGenerator();
 
         //Palette
-        TIERS[0] = [1250, 1250, 1250, 1250, 1250, 1250, 1250, 1250];
+        TIERS[0] = [1000, 1600, 1400, 1800, 1200, 400, 400, 2200];
         //Noise
         TIERS[1] = [1000, 4000, 4000, 1000];
         //Speed
@@ -145,7 +145,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (msg.value != MINT_PRICE) revert MintPrice();
         if (snowcrashMinted[msg.sender]) revert SnowcrashMinted();
         if (snowcrashReserve == 0) revert ReserveClosed();
-        snowcrashReserve -= 1;
+        --snowcrashReserve;
         return mintInternal(msg.sender, 1);
     }
 
@@ -153,12 +153,14 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         address[] calldata _addresses,
         uint256[] calldata _amount
     ) external payable onlyOwner {
-        if (freeMinted) revert FreeMinted();
+        if (freeMinted) revert FreeMintDone();
         uint256 addressesLength = _addresses.length;
         if (addressesLength != _amount.length) revert ArrayLengths();
         for (uint256 i; i < addressesLength; ++i) {
             mintInternal(_addresses[i], _amount[i]);
         }
+
+        freeMinted = true;
     }
 
     function mintInternal(address _to, uint256 _amount) internal {

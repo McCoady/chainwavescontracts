@@ -28,7 +28,7 @@ contract ChainWavesGenerator {
         PALETTES[1] = ["3a0ca3", "f72585", "4cc9f0", "7209b7", "4cc9f0"];
         //rioja
         PALETTES[2] = ["250902", "38040e", "640d14", "800e13", "ad2831"];
-        //alien
+        //forest
         PALETTES[3] = ["013026", "a1ce3f", "107e57", "014760", "cbe58e"];
         //samba
         PALETTES[4] = ["009638", "F6D800", "002672", "fff", "f8961e"];
