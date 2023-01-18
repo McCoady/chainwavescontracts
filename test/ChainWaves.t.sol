@@ -159,7 +159,7 @@ contract ChainWavesTest is Test {
         assert(newOwner.balance == 0.0256 ether);
     }
 
-    function testMerkllProofMint() public {
+    function testMerkleProofMint() public {
         // TODO: change to a valid proof
         bytes32[] memory proof = new bytes32[](2);
         proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
