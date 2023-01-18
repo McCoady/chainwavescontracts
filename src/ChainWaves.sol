@@ -6,25 +6,10 @@ import "solmate/auth/Owned.sol";
 import "openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
 import "./AnonymiceLibrary.sol";
 import "./ChainWavesGenerator.sol";
+import "./ChainWavesErrors.sol";
 
-contract ChainWaves is ERC721, Owned {
+contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     using AnonymiceLibrary for uint8;
-
-    error SoldOut();
-    error NotLive();
-    error MintPrice();
-    error MaxThree();
-    error PublicMinted();
-    error SnowcrashMinted();
-    error NotToad();
-    error FreeMinted();
-    error NotSnowcrashList();
-    error ReserveClosed();
-    error SelfMintOnly();
-    error ArrayLengths();
-    error NonExistantId();
-    error Stap();
-    error WithdrawFail();
 
     struct Trait {
         string traitName;
