@@ -85,10 +85,11 @@ contract ChainWavesTest is Test {
         chainWaves.addTraitType(5, numCols);
     }
 
-    // function testToadMint() public {
-    //     chainWaves.toadMint();
-    //     assertEq(chainWaves.totalSupply(), 5);
-    // }
+    function testFailNormieMintTwice() public {
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+        assertEq(chainWaves.totalSupply(), 1);
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+    }
 
     function testFailMintZero() public {
         chainWaves.normieMint(0);
@@ -102,6 +103,16 @@ contract ChainWavesTest is Test {
     function testNormieMintThree() public {
         chainWaves.normieMint{value: 0.0256 ether * 3}(3);
         assertEq(chainWaves.totalSupply(), 3);
+    }
+
+    function testFailFreeTwice() public {
+        address[] memory mintTo = new address[](1);
+        mintTo[0] = makeAddr("Alexstrasza");
+        uint256[] memory amount = new uint256[](1);
+        amount[0] = 1;
+        chainWaves.freeMints(mintTo, amount);
+        assertEq(chainWaves.totalSupply(), 1);
+        chainWaves.freeMints(mintTo, amount);
     }
 
     function testFreeMint3x1() public {
