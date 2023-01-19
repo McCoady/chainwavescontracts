@@ -137,7 +137,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         if (msg.value != MINT_PRICE) revert MintPrice();
 
         uint256 minterInfo = mintInfo[msg.sender];
-        if ((minterInfo & (0xF0 >> 4)) != 0) revert SnowcrashMinted();
+        if (((minterInfo & 0xF0) >> 4) != 0) revert SnowcrashMinted();
         if (snowcrashReserve == 0) revert ReserveClosed();
         --snowcrashReserve;
 
