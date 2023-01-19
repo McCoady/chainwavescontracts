@@ -167,8 +167,6 @@ contract ChainWavesTest is Test {
     }
 
     function testSnowcrashMint() public {
-        // TODO: change to a valid proof
-
         bytes32[] memory proof = new bytes32[](8);
         proof[
             0
@@ -196,7 +194,6 @@ contract ChainWavesTest is Test {
         ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
 
         vm.stopPrank();
-        // TODO: change to WL address
         hoax(0x4533d1F65906368ebfd61259dAee561DF3f3559D);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
@@ -204,8 +201,6 @@ contract ChainWavesTest is Test {
 
     // Currently doesn't work (can inifite mint)
     function testCannotSnowcrashMintTwice() public {
-        // TODO: make sure this is failing for the right reason
-
         bytes32[] memory proof = new bytes32[](8);
         proof[
             0
@@ -243,8 +238,6 @@ contract ChainWavesTest is Test {
 
     // Currently works,
     function testSnowcrashMintThrice() public {
-        // TODO: make sure this is failing for the right reason
-
         bytes32[] memory proof = new bytes32[](8);
         proof[
             0
@@ -276,9 +269,9 @@ contract ChainWavesTest is Test {
         startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
-        // should revert here
-        // vm.expectRevert(ChainWavesErrors.SnowcrashMinted.selector);
+        vm.expectRevert(ChainWavesErrors.SnowcrashMinted.selector);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+        vm.expectRevert(ChainWavesErrors.SnowcrashMinted.selector);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
     }
 
@@ -319,8 +312,6 @@ contract ChainWavesTest is Test {
     }
 
     function testMintNormieThenSnowcrash() public {
-        // TODO: make revert work properly
-
         bytes32[] memory proof = new bytes32[](8);
         proof[
             0
@@ -348,7 +339,6 @@ contract ChainWavesTest is Test {
         ] = 0x70e151d126139930c80411467e82e9b1fc563491007c59704bb1479e2dc3d615;
 
         vm.stopPrank();
-        // TODO: change to WL address
         startHoax(address(0x4533d1F65906368ebfd61259dAee561DF3f3559D));
         chainWaves.normieMint{value: 0.0256 ether}(1);
         assertEq(chainWaves.totalSupply(), 1);
