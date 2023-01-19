@@ -44,7 +44,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     constructor()
         ERC721("ChainWaves", "CA")
-        Owned(0x9ea04B953640223dbb8098ee89C28E7a3B448858)
+        Owned(0x888f8AA938dbb18b28bdD111fa4A0D3B8e10C871)
     {
         chainWavesGenerator = new ChainWavesGenerator();
 
@@ -314,10 +314,21 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
     }
 
     function withdraw() external payable onlyOwner {
-        (bool sent, ) = payable(msg.sender).call{value: address(this).balance}(
-            ""
-        );
-        if (!sent) revert WithdrawFail();
+        uint256 twelve = (address(this).balance / 100) * 12;
+        uint256 eightythree = (address(this).balance / 100) * 83;
+        uint256 five = (address(this).balance / 100) * 5;
+        (bool sentI, ) = payable(
+            address(0x4533d1F65906368ebfd61259dAee561DF3f3559D)
+        ).call{value: twelve}("");
+        if (!sentI) revert WithdrawFail();
+        (bool sentC, ) = payable(
+            address(0x888f8AA938dbb18b28bdD111fa4A0D3B8e10C871)
+        ).call{value: five}("");
+        if (!sentC) revert WithdrawFail();
+        (bool sentT, ) = payable(
+            address(0xeFEed35D024CF5B59482Fa4BC594AaeAf694E669)
+        ).call{value: eightythree}("");
+        if (!sentT) revert WithdrawFail();
     }
 
     function wipeSnowcrashReserve() external payable onlyOwner {

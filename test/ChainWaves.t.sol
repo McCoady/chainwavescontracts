@@ -11,7 +11,7 @@ contract ChainWavesTest is Test {
 
     function setUp() public {
         chainWaves = new ChainWaves();
-        startHoax(0x9ea04B953640223dbb8098ee89C28E7a3B448858);
+        startHoax(0x888f8AA938dbb18b28bdD111fa4A0D3B8e10C871);
         setUpPalettes();
         setUpNoise();
         setUpSpeed();
@@ -23,15 +23,16 @@ contract ChainWavesTest is Test {
     }
 
     function setUpPalettes() public {
-        ChainWaves.Trait[] memory palettes = new ChainWaves.Trait[](8);
+        ChainWaves.Trait[] memory palettes = new ChainWaves.Trait[](9);
         palettes[0] = ChainWaves.Trait("Lava", "Palette");
         palettes[1] = ChainWaves.Trait("Flamingo", "Palette");
         palettes[2] = ChainWaves.Trait("Rioja", "Palette");
-        palettes[3] = ChainWaves.Trait("Alien", "Palette");
+        palettes[3] = ChainWaves.Trait("Forest", "Palette");
         palettes[4] = ChainWaves.Trait("Samba", "Palette");
         palettes[5] = ChainWaves.Trait("Pepewaves", "Palette");
-        palettes[6] = ChainWaves.Trait("Twister", "Palette");
-        palettes[7] = ChainWaves.Trait("Purple Rain", "Palette");
+        palettes[6] = ChainWaves.Trait("Cow", "Palette");
+        palettes[7] = ChainWaves.Trait("Pastelize", "Palette");
+        palettes[8] = ChainWaves.Trait("Dank", "Palette");
 
         chainWaves.addTraitType(0, palettes);
     }
@@ -155,15 +156,13 @@ contract ChainWavesTest is Test {
         console.logString(uri);
     }
 
-    function testWithdrawl() public {
-        address newOwner = makeAddr("Onyxia");
+    function testWithdrawal() public {
+        address toad = 0xeFEed35D024CF5B59482Fa4BC594AaeAf694E669;
         chainWaves.normieMint{value: 0.0256 ether}(1);
-        chainWaves.transferOwnership(newOwner);
-        vm.stopPrank();
-        assert(newOwner.balance == 0);
-        vm.prank(newOwner);
+        assert(toad.balance == 0);
+
         chainWaves.withdraw();
-        assert(newOwner.balance == 0.0256 ether);
+        assertEq(toad.balance, (0.0256 ether * 83) / 100);
     }
 
     function testSnowcrashMint() public {
@@ -200,6 +199,7 @@ contract ChainWavesTest is Test {
         hoax(0x4533d1F65906368ebfd61259dAee561DF3f3559D);
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
         assertEq(chainWaves.totalSupply(), 1);
+        assertEq(chainWaves.snowcrashReserve(), 119);
     }
 
     // Currently doesn't work (can inifite mint)
@@ -365,5 +365,34 @@ contract ChainWavesTest is Test {
             1
         ] = 0x0000000000000000000000000000000000000000000000000000000000000000;
         chainWaves.snowcrashMint{value: 0.0256 ether}(proof);
+    }
+
+    function testCannotOverrunSnowcrashReserve() public {
+        uint256 nonReservedSpots = chainWaves.MAX_SUPPLY() -
+            chainWaves.snowcrashReserve();
+        for (uint256 i; i < nonReservedSpots; ++i) {
+            address minter = address(uint160(i + 100));
+            vm.stopPrank();
+            hoax(minter);
+            chainWaves.normieMint{value: 0.0256 ether}(1);
+        }
+        vm.stopPrank();
+        vm.expectRevert(ChainWavesErrors.SoldOut.selector);
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+    }
+
+    function testSnowcrashReserveSetToZero() public {
+        uint256 nonReservedSpots = chainWaves.MAX_SUPPLY() -
+            chainWaves.snowcrashReserve();
+        chainWaves.wipeSnowcrashReserve();
+        for (uint256 i; i < nonReservedSpots; ++i) {
+            address minter = address(uint160(i + 100));
+            vm.stopPrank();
+            hoax(minter);
+            chainWaves.normieMint{value: 0.0256 ether}(1);
+        }
+        vm.stopPrank();
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+        assertEq(chainWaves.totalSupply(), nonReservedSpots + 1);
     }
 }
