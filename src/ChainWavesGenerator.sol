@@ -6,7 +6,7 @@ import "./AnonymiceLibrary.sol";
 contract ChainWavesGenerator {
     using AnonymiceLibrary for uint8;
 
-    string[][8] private PALETTES;
+    string[][9] private PALETTES;
     uint256[] private NOISE;
     uint256[] private SPEED;
     string[] private CHARS;
@@ -38,7 +38,8 @@ contract ChainWavesGenerator {
         PALETTES[6] = ["aabf98", "1f1f1f", "f2f2f2", "b5caa3", "20251e"];
         //pastelize
         PALETTES[7] = ["7067cf", "b7c0ee", "cbf3d2", "f87575", "ef626c"];
-
+        //dank
+        PALETTES[8] = ["414Cb3", "06061a", "e80663", "fff", "ff0066"];
         NOISE = [20, 35, 55, 85];
 
         SPEED = [95, 75, 50, 25];

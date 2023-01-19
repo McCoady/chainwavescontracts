@@ -49,7 +49,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         chainWavesGenerator = new ChainWavesGenerator();
 
         //Palette
-        TIERS[0] = [1000, 1600, 1400, 1800, 1200, 400, 400, 2200];
+        TIERS[0] = [1000, 1500, 1400, 1700, 1200, 400, 400, 1600, 800];
         //Noise
         TIERS[1] = [1000, 4000, 4000, 1000];
         //Speed
