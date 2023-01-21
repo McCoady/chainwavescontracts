@@ -165,6 +165,17 @@ contract ChainWavesTest is Test {
         assertEq(toad.balance, (0.0256 ether * 83) / 100);
     }
 
+    function testHash() public {
+        chainWaves.normieMint{value: 0.0256 ether}(1);
+        vm.roll(10);
+        string memory hashValue = chainWaves._tokenIdToHash(0);
+        vm.stopPrank();
+        hoax(address(100));
+        chainWaves.normieMint{value: 0.0512 ether}(2);
+        vm.roll(10);
+        assertEq(chainWaves._tokenIdToHash(0), hashValue);
+    }
+
     function testSnowcrashMint() public {
         bytes32[] memory proof = new bytes32[](8);
         proof[

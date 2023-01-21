@@ -40,6 +40,7 @@ contract ChainWavesGenerator {
         PALETTES[7] = ["7067cf", "b7c0ee", "cbf3d2", "f87575", "ef626c"];
         //dank
         PALETTES[8] = ["414Cb3", "06061a", "e80663", "fff", "ff0066"];
+
         NOISE = [20, 35, 55, 85];
 
         SPEED = [95, 75, 50, 25];

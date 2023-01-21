@@ -27,7 +27,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     // TODO: generate actual root (this is folded faces)
     bytes32 constant snowcrashRoot =
-        0x20a2baf6f58cf2cfad13ed82dba586e61e6c16237f00add3c2d30da405dfc4af;
+        0xea35e50958ff75fe96e04a6dd792de75a26dd0c2a2d12e8a4c485d938961eb39;
 
     bool private freeMinted;
 
@@ -44,7 +44,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
 
     constructor()
         ERC721("ChainWaves", "CA")
-        Owned(0x888f8AA938dbb18b28bdD111fa4A0D3B8e10C871)
+        Owned(0xB6eE8B1899e4cad7e28015995B82969e44BD0bb0)
     {
         chainWavesGenerator = new ChainWavesGenerator();
 
@@ -326,7 +326,7 @@ contract ChainWaves is ChainWavesErrors, ERC721, Owned {
         ).call{value: five}("");
         if (!sentC) revert WithdrawFail();
         (bool sentT, ) = payable(
-            address(0xeFEed35D024CF5B59482Fa4BC594AaeAf694E669)
+            address(0xE4260Df86f5261A41D19c2066f1Eb2Eb4F009e84)
         ).call{value: eightythree}("");
         if (!sentT) revert WithdrawFail();
     }
